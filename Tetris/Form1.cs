@@ -16,7 +16,7 @@ namespace Tetris
             public Rectangle rect;
         }
 
-        class SceneOffset
+        class TerisLayout
         {
             public int X1;
             public int Y1;
@@ -33,7 +33,7 @@ namespace Tetris
             I, J, L, O, S, T, Z
         }
         //网格大小
-        const int kGridSize = 11;
+        const int kGridSize = 20;
         //画布起点
         Point kScenePoint = new Point(10, 20);
         //画布网格数 10x20
@@ -61,7 +61,7 @@ namespace Tetris
         //预览方块组
         Grid[] nextPreGrids = new Grid[4];
         //7种组合，在第一块固定的时候，其他块的偏移
-        List<SceneOffset>[] tetrisOffset = new List<SceneOffset>[7];
+        List<TerisLayout>[] tetrisLayout = new List<TerisLayout>[7];
         //变体数量
         int[] changeNum = new int[7];
         //出生点
@@ -74,9 +74,9 @@ namespace Tetris
         int kPreBornX = 0;
         int kPreBornY = 0;
         //预览区的offset
-        SceneOffset nextOffset = null;
+        TerisLayout nextLayout = null;
         //当前的offwet
-        SceneOffset currentOffset = null;
+        TerisLayout currentLayout = null;
         //下落速度
         const int dropSpeed = 5;
         const int timerInterval = 50;
@@ -179,61 +179,62 @@ namespace Tetris
         void InitTetrisType()
         {
             //O
-            tetrisOffset[3] = new List<SceneOffset>();
-            tetrisOffset[3].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
+            tetrisLayout[3] = new List<TerisLayout>();
+            tetrisLayout[3].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
             changeNum[3] = 1;
             //I
-            tetrisOffset[0] = new List<SceneOffset>();
-            tetrisOffset[0].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 1, Y4 = 3 });
-            tetrisOffset[0].Add(new SceneOffset() { X1 = 0, Y1 = 1, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 3, Y4 = 1 });
+            tetrisLayout[0] = new List<TerisLayout>();
+            tetrisLayout[0].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 1, Y4 = 3 });
+            tetrisLayout[0].Add(new TerisLayout() { X1 = 0, Y1 = 1, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 3, Y4 = 1 });
             changeNum[0] = 2;
             //S
-            tetrisOffset[4] = new List<SceneOffset>();
-            tetrisOffset[4].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
-            tetrisOffset[4].Add(new SceneOffset() { X1 = 2, Y1 = 1, X2 = 3, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 2 });
+            tetrisLayout[4] = new List<TerisLayout>();
+            tetrisLayout[4].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
+            tetrisLayout[4].Add(new TerisLayout() { X1 = 2, Y1 = 1, X2 = 3, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 2 });
             changeNum[4] = 2;
             //Z
-            tetrisOffset[6] = new List<SceneOffset>();
-            tetrisOffset[6].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
-            tetrisOffset[6].Add(new SceneOffset() { X1 = 2, Y1 = 0, X2 = 2, Y2 = 1, X3 = 1, Y3 = 1, X4 = 1, Y4 = 2 });
+            tetrisLayout[6] = new List<TerisLayout>();
+            tetrisLayout[6].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
+            tetrisLayout[6].Add(new TerisLayout() { X1 = 2, Y1 = 0, X2 = 2, Y2 = 1, X3 = 1, Y3 = 1, X4 = 1, Y4 = 2 });
             changeNum[6] = 2;
             //L
-            tetrisOffset[2] = new List<SceneOffset>();
-            tetrisOffset[2].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 2 });
-            tetrisOffset[2].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 1, Y4 = 2 });
-            tetrisOffset[2].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 2, Y2 = 0, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
-            tetrisOffset[2].Add(new SceneOffset() { X1 = 3, Y1 = 1, X2 = 3, Y2 = 2, X3 = 2, Y3 = 2, X4 = 1, Y4 = 2 });
+            tetrisLayout[2] = new List<TerisLayout>();
+            tetrisLayout[2].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 2 });
+            tetrisLayout[2].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 1, Y4 = 2 });
+            tetrisLayout[2].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 2, Y2 = 0, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
+            tetrisLayout[2].Add(new TerisLayout() { X1 = 3, Y1 = 1, X2 = 3, Y2 = 2, X3 = 2, Y3 = 2, X4 = 1, Y4 = 2 });
             changeNum[2] = 4;
             //J
-            tetrisOffset[1] = new List<SceneOffset>();
-            tetrisOffset[1].Add(new SceneOffset() { X1 = 2, Y1 = 0, X2 = 2, Y2 = 1, X3 = 2, Y3 = 2, X4 = 1, Y4 = 2 });
-            tetrisOffset[1].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
-            tetrisOffset[1].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 2, Y2 = 0, X3 = 1, Y3 = 1, X4 = 1, Y4 = 2 });
-            tetrisOffset[1].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 3, Y4 = 2 });
+            tetrisLayout[1] = new List<TerisLayout>();
+            tetrisLayout[1].Add(new TerisLayout() { X1 = 2, Y1 = 0, X2 = 2, Y2 = 1, X3 = 2, Y3 = 2, X4 = 1, Y4 = 2 });
+            tetrisLayout[1].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
+            tetrisLayout[1].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 2, Y2 = 0, X3 = 1, Y3 = 1, X4 = 1, Y4 = 2 });
+            tetrisLayout[1].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 3, Y4 = 2 });
             changeNum[1] = 4;
             //T
-            tetrisOffset[5] = new List<SceneOffset>();
-            tetrisOffset[5].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 2, Y4 = 2 });
-            tetrisOffset[5].Add(new SceneOffset() { X1 = 2, Y1 = 0, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
-            tetrisOffset[5].Add(new SceneOffset() { X1 = 2, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
-            tetrisOffset[5].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 1 });
+            tetrisLayout[5] = new List<TerisLayout>();
+            tetrisLayout[5].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 2, Y4 = 2 });
+            tetrisLayout[5].Add(new TerisLayout() { X1 = 2, Y1 = 0, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
+            tetrisLayout[5].Add(new TerisLayout() { X1 = 2, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
+            tetrisLayout[5].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 1 });
             changeNum[5] = 4;
         }
 
         class YRulerCell
         {
             public int Xoffset;//相对于起始点X的偏移
-            public int Yfill;//y<Y方向实心的格子个数，再往上全是空
+            public int Yfill;//y<Y方向实心的格子个数，再往上全是空；Y方向填充数量
         }
-        //Y匹配规则
+        //Y匹配规则（列特征满足形状填充要求的规则）
         class YRuler
         {
             public int ChangeType;//适用变体类型
             public int Xoffset;//当前的tetris原点和YRuler的原点的偏移
-            public List<YRulerCell> Rulers = new List<YRulerCell>();
+            public List<YRulerCell> Rulers = new List<YRulerCell>();//每个cell是每列的匹配格子特征
         }
         List<YRuler>[] aiOffset = new List<YRuler>[7];
 
+        //底部填充空格的特征
         void InitAITable()
         {
             //O
@@ -341,11 +342,11 @@ namespace Tetris
             nextTetrisType = randGen.Next(7);//选择类型
             nextChangeType = randGen.Next(4);//选择变体
             nextChangeType = nextChangeType % changeNum[nextTetrisType];
-            nextOffset = tetrisOffset[nextTetrisType][nextChangeType];
+            nextLayout = tetrisLayout[nextTetrisType][nextChangeType];
         }
 
         //在某个坐标位置生成掉落方块
-        Grid[] GetRunGridsAtPos(int x, int y, SceneOffset offset)
+        Grid[] GenRunGridsAtPos(int x, int y, TerisLayout offset)
         {
             Grid[] grids = new Grid[4];
             grids[0] = GetGridByPos(x + offset.X1, y + offset.Y1);
@@ -355,10 +356,30 @@ namespace Tetris
             return grids;
         }
 
-        //预览区初始化
-        void CalcPreGrids()
+        void ShowRunGrids()
         {
-            SceneOffset offset = nextOffset;
+            foreach(var g in runGrids)
+            {
+                g.show=true;
+                g.running=true;
+            }
+        }
+        void RemoveRunGrids()
+        {
+
+            if (runGrids[0] == null) return;
+            for (int i = 0; i < runGrids.Length; i++)
+            {
+                runGrids[i].show = false;
+                runGrids[i].running = false;
+                runGrids[i] = null;
+            }
+        }
+
+        //预览区初始化
+        void GenPreGrids()
+        {
+            TerisLayout offset = nextLayout;
 
             foreach (Grid g in nextPreGrids)
             {
@@ -414,7 +435,8 @@ namespace Tetris
                     break;
                 case Keys.K:
                     IsAiControl = true;
-                    CalcAICtrl();
+                    //CalcAICtrl();
+                    RunPierreAI();
                     break;
                 case Keys.Escape:
                     IsAiControl = false;
@@ -472,32 +494,209 @@ namespace Tetris
             currentRunGridX = kRunGridBirthX;
             currentRunGridY = kRunGridBirthY;
 
-            if (nextOffset == null)
+            if (nextLayout == null)
             {
                 GenerateNextTetris();
             }
-            currentOffset = nextOffset;
+            currentLayout = nextLayout;
             curChangeType = nextChangeType;
             curTetrisType = nextTetrisType;
 
-            //把预览区的offset移到游戏区
-            runGrids = GetRunGridsAtPos(currentRunGridX, currentRunGridY, currentOffset);
-            if (!CheckNextGridValid(runGrids))
+            //把预览区的布局移到游戏区
+            runGrids = GenRunGridsAtPos(currentRunGridX, currentRunGridY, currentLayout);
+            if (!IsValidGrid(runGrids))
             {
                 gameState = GameState.GameOver;
                 return;
             }
-            //生成预览区的offset
             GenerateNextTetris();
             //计算预览区网格
-            CalcPreGrids();
+            GenPreGrids();
             gameState = GameState.NormalDrop;
 
             if (IsAiControl)
             {
-                CalcAICtrl();
+                //CalcAICtrl();
+                RunPierreAI();
             }
+            ShowRunGrids();
+
         }
+        //新的ai
+        void RunPierreAI()
+        {
+            int maxEvalue = -999;
+            int best = 0;
+            int step = -1;
+            var bestlayout = currentLayout;
+
+            //每一列放下G，计算其评估值，选估值最大的位置
+            int changeType=0;
+            while (step < kSceneWidth - 1)
+            {
+                RemoveRunGrids();
+                var grids = GenRunGridsAtPos(step, 0, currentLayout);
+                if (!IsValidGrid(grids))
+                {
+                    step = -1;
+                    changeType++;//所有变换
+                    if (changeType == changeNum[curTetrisType])
+                    {
+                        break;
+                    }
+
+                    currentLayout = tetrisLayout[curTetrisType][changeType];
+                    curChangeType = changeType;
+                    continue;
+                }
+                runGrids = grids;
+                currentRunGridX = step;
+                currentRunGridY = 0;
+
+                while (RunGridMove(Direction.DOWN)) ;
+                //计算评估值
+                int h = GetLandingHeight();
+                int e = GetErodedMetric();
+                int t = GetTranslations();
+                int o = GetHoles();
+                int w = GetWells();
+                int evalue = e - h - t - 4 * o - w;
+                if (evalue > maxEvalue)
+                {
+                    maxEvalue = evalue;
+                    best = step;
+                    bestlayout = currentLayout;
+                }
+                step++;
+
+            }
+
+            RemoveRunGrids();
+            currentRunGridX = best;
+            currentRunGridY = 0;
+            currentLayout=bestlayout;
+            runGrids = GenRunGridsAtPos(best, 0, currentLayout);
+            
+
+            gameState = GameState.FastDrop;
+        }
+
+        int GetLandingHeight()
+        {
+            int landingH = kSceneHeight - runGrids[0].sceneY;
+            return landingH;
+        }
+
+        //评估消除行的参数
+        int GetErodedMetric()
+        {
+            int erodedRow = 0;
+            int erodedTries = 0;
+            for (int j = 0; j < kSceneHeight; j++)
+            {
+                int cnt = 0;
+                for (int i = 0; i < kSceneWidth; i++)
+                {
+                    if (!allGrids[i, j].show)
+                    {
+                        break;
+                    }
+                    cnt++;
+                }
+                if (cnt == kSceneWidth)
+                {
+                    //消除的行数
+                    erodedRow++;
+                    //G被消除的格子数
+                    foreach (var g in runGrids)
+                    {
+                        if (g.sceneY == j)
+                        {
+                            erodedTries++;
+                        }
+                    }
+                }
+            }
+            return erodedRow * erodedTries;
+        }
+
+        //计算行变换
+        int GetTranslations()
+        {
+            int cnt = 0;
+            for (int j = 0; j < kSceneHeight; j++)
+            {
+                for (int i = 0; i < kSceneWidth; i++)
+                {
+                    if (!allGrids[i, j].show && j < kSceneHeight - 1 && allGrids[i, j + 1].show)
+                    {
+                        cnt++;
+                    }
+                    if (allGrids[i, j].show && j < kSceneHeight - 1 && !allGrids[i, j + 1].show)
+                    {
+                        cnt++;
+                    }
+                    if (!allGrids[i, j].show && i < kSceneWidth - 1 && allGrids[i + 1, j].show)
+                    {
+                        cnt++;
+                    }
+                    if (allGrids[i, j].show && i < kSceneWidth - 1 && !allGrids[i + 1, j].show)
+                    {
+                        cnt++;
+                    }
+
+                }
+            }
+            return cnt;
+        }
+
+        //计算空洞
+        int GetHoles()
+        {
+            int holes = 0;
+            for (int i = 0; i < kSceneWidth; i++)
+            {
+                for (int j = 0; j < kSceneHeight; j++)
+                {
+                    if (allGrids[i, j].show)
+                    {
+                        for (int k = j + 1; k < kSceneHeight; k++)
+                        {
+                            if (allGrids[i, k].show == false)
+                            {
+                                holes++;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            return holes;
+        }
+
+        //计算井
+        int GetWells()
+        {
+            int wells = 0;
+            int sum = 0;
+            for (int i = 0; i < kSceneWidth; i++)
+            {
+                for (int j = 0; j < kSceneHeight; j++)
+                {
+                    if (!allGrids[i, j].show && (i - 1 < 0 || allGrids[i - 1, j].show) && (i + 1 == kSceneWidth || allGrids[i + 1, j].show))
+                    {
+                        wells++;
+                    }
+                    if (allGrids[i, j].show)
+                    {
+                        sum += wells * (wells + 1) / 2;
+                        wells = 0;
+                    }
+                }
+            }
+            return sum;
+        }
+
 
         void CalcAICtrl()
         {
@@ -521,6 +720,7 @@ namespace Tetris
                     bool bEmpty = true;//判断是否一行全空，全空停止检测
                     for (int i = 0; i < kSceneWidth; i++)
                     {
+                        //从下向上从左向右找到第一个空格
                         if (allGrids[i, j].show == false)
                         {
                             bool ok = checkRuler(i, j, ruler);
@@ -555,7 +755,7 @@ namespace Tetris
         int calcBestY(YRuler ruler)
         {
             int[] h = new int[kSceneWidth];
-            
+
             int c = 0;
             for (int i = 0; i < kSceneWidth; i++)
             {
@@ -576,10 +776,10 @@ namespace Tetris
 
             int min = kSceneHeight;
             //根据ruler计算结果最低点
-            for(int i=0;i<kSceneWidth;i++)
+            for (int i = 0; i < kSceneWidth; i++)
             {
                 int max = 0;
-                foreach(var r in ruler.Rulers)
+                foreach (var r in ruler.Rulers)
                 {
                     int x = i + r.Xoffset;
                     if (x < 0 || x > kSceneWidth - 1) { max = kSceneHeight; break; }
@@ -639,34 +839,32 @@ namespace Tetris
             {
                 return false;
             }
-            else if (xx == -1 || xx == kSceneWidth)
+            if (xx == -1 || xx == kSceneWidth)
             {
                 if (r.Yfill < 3) return false;
+                return true;
             }
-            else
+            //底部不能为空
+            if (y < kSceneHeight - 1 && allGrids[xx, y + 1].show == false)
             {
-                //底部不能为空
-                if (y < kSceneHeight - 1 && allGrids[xx, y + 1].show == false)
+                return false;
+            }
+
+            for (int i = 0; i < r.Yfill; i++)
+            {
+                if (allGrids[xx, y - i].show == false)
                 {
                     return false;
                 }
-
-                for (int i = 0; i < r.Yfill; i++)
+            }
+            //Yfill=3特殊处理
+            if (r.Yfill < 3)
+            {
+                for (int i = 0; i <= y - r.Yfill; i++)
                 {
-                    if (allGrids[xx, y - i].show == false)
+                    if (allGrids[xx, i].show)
                     {
                         return false;
-                    }
-                }
-                //Yfill=3特殊处理
-                if (r.Yfill < 3)
-                {
-                    for (int i = 0; i <= y - r.Yfill; i++)
-                    {
-                        if (allGrids[xx, i].show)
-                        {
-                            return false;
-                        }
                     }
                 }
             }
@@ -695,7 +893,8 @@ namespace Tetris
             LEFT, RIGHT, DOWN, UP
         }
 
-        bool CheckNextGridValid(Grid[] nextGrids)
+        //检查格子位置是否正确
+        bool IsValidGrid(Grid[] nextGrids)
         {
             for (int i = 0; i < nextGrids.Length; i++)
             {
@@ -710,28 +909,28 @@ namespace Tetris
             switch (dir)
             {
                 case Direction.DOWN:
-                    nextGrids = GetRunGridsAtPos(currentRunGridX, currentRunGridY + 1, currentOffset);
-                    if (!CheckNextGridValid(nextGrids)) return false;
+                    nextGrids = GenRunGridsAtPos(currentRunGridX, currentRunGridY + 1, currentLayout);
+                    if (!IsValidGrid(nextGrids)) return false;
                     currentRunGridY++;
                     break;
                 case Direction.LEFT:
-                    nextGrids = GetRunGridsAtPos(currentRunGridX - 1, currentRunGridY, currentOffset);
-                    if (!CheckNextGridValid(nextGrids)) return false;
+                    nextGrids = GenRunGridsAtPos(currentRunGridX - 1, currentRunGridY, currentLayout);
+                    if (!IsValidGrid(nextGrids)) return false;
                     currentRunGridX--;
                     break;
                 case Direction.RIGHT:
-                    nextGrids = GetRunGridsAtPos(currentRunGridX + 1, currentRunGridY, currentOffset);
-                    if (!CheckNextGridValid(nextGrids)) return false;
+                    nextGrids = GenRunGridsAtPos(currentRunGridX + 1, currentRunGridY, currentLayout);
+                    if (!IsValidGrid(nextGrids)) return false;
                     currentRunGridX++;
                     break;
                 case Direction.UP:
                     {
                         int changType = (curChangeType + 1) % changeNum[curTetrisType];
-                        SceneOffset offset = tetrisOffset[curTetrisType][changType];
-                        nextGrids = GetRunGridsAtPos(currentRunGridX, currentRunGridY, offset);
-                        if (!CheckNextGridValid(nextGrids))
+                        TerisLayout layout = tetrisLayout[curTetrisType][changType];
+                        nextGrids = GenRunGridsAtPos(currentRunGridX, currentRunGridY, layout);
+                        if (!IsValidGrid(nextGrids))
                             return false;
-                        currentOffset = offset;
+                        currentLayout = layout;
                         curChangeType = changType;
                     }
                     break;
