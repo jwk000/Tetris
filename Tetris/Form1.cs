@@ -16,7 +16,7 @@ namespace Tetris
             public Rectangle rect;
         }
 
-        class SceneOffset
+        class TerisLayout
         {
             public int X1;
             public int Y1;
@@ -76,9 +76,9 @@ namespace Tetris
         int kPreBornX = 0;
         int kPreBornY = 0;
         //预览区的offset
-        SceneOffset nextOffset = null;
+        TerisLayout nextLayout = null;
         //当前的offwet
-        SceneOffset currentOffset = null;
+        TerisLayout currentLayout = null;
         //下落速度
         const int dropSpeed = 5;
         const int timerInterval = 50;
@@ -180,46 +180,46 @@ namespace Tetris
         void InitTetrisType()
         {
             //O
-            tetrisOffset[3] = new List<SceneOffset>();
-            tetrisOffset[3].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
+            tetrisLayout[3] = new List<TerisLayout>();
+            tetrisLayout[3].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
             changeNum[3] = 1;
 
             //I
-            tetrisOffset[0] = new List<SceneOffset>();
-            tetrisOffset[0].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 1, Y4 = 3 });
-            tetrisOffset[0].Add(new SceneOffset() { X1 = 0, Y1 = 1, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 3, Y4 = 1 });
+            tetrisLayout[0] = new List<TerisLayout>();
+            tetrisLayout[0].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 1, Y4 = 3 });
+            tetrisLayout[0].Add(new TerisLayout() { X1 = 0, Y1 = 1, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 3, Y4 = 1 });
             changeNum[0] = 2;
 
             //S
-            tetrisOffset[4] = new List<SceneOffset>();
-            tetrisOffset[4].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
-            tetrisOffset[4].Add(new SceneOffset() { X1 = 2, Y1 = 1, X2 = 3, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 2 });
+            tetrisLayout[4] = new List<TerisLayout>();
+            tetrisLayout[4].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
+            tetrisLayout[4].Add(new TerisLayout() { X1 = 2, Y1 = 1, X2 = 3, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 2 });
             changeNum[4] = 2;
             //Z
-            tetrisOffset[6] = new List<SceneOffset>();
-            tetrisOffset[6].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
-            tetrisOffset[6].Add(new SceneOffset() { X1 = 2, Y1 = 0, X2 = 2, Y2 = 1, X3 = 1, Y3 = 1, X4 = 1, Y4 = 2 });
+            tetrisLayout[6] = new List<TerisLayout>();
+            tetrisLayout[6].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
+            tetrisLayout[6].Add(new TerisLayout() { X1 = 2, Y1 = 0, X2 = 2, Y2 = 1, X3 = 1, Y3 = 1, X4 = 1, Y4 = 2 });
             changeNum[6] = 2;
             //L
-            tetrisOffset[2] = new List<SceneOffset>();
-            tetrisOffset[2].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 2 });
-            tetrisOffset[2].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 1, Y4 = 2 });
-            tetrisOffset[2].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 2, Y2 = 0, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
-            tetrisOffset[2].Add(new SceneOffset() { X1 = 3, Y1 = 1, X2 = 3, Y2 = 2, X3 = 2, Y3 = 2, X4 = 1, Y4 = 2 });
+            tetrisLayout[2] = new List<TerisLayout>();
+            tetrisLayout[2].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 2 });
+            tetrisLayout[2].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 1, Y4 = 2 });
+            tetrisLayout[2].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 2, Y2 = 0, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
+            tetrisLayout[2].Add(new TerisLayout() { X1 = 3, Y1 = 1, X2 = 3, Y2 = 2, X3 = 2, Y3 = 2, X4 = 1, Y4 = 2 });
             changeNum[2] = 4;
             //J
-            tetrisOffset[1] = new List<SceneOffset>();
-            tetrisOffset[1].Add(new SceneOffset() { X1 = 2, Y1 = 0, X2 = 2, Y2 = 1, X3 = 2, Y3 = 2, X4 = 1, Y4 = 2 });
-            tetrisOffset[1].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
-            tetrisOffset[1].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 2, Y2 = 0, X3 = 1, Y3 = 1, X4 = 1, Y4 = 2 });
-            tetrisOffset[1].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 3, Y4 = 2 });
+            tetrisLayout[1] = new List<TerisLayout>();
+            tetrisLayout[1].Add(new TerisLayout() { X1 = 2, Y1 = 0, X2 = 2, Y2 = 1, X3 = 2, Y3 = 2, X4 = 1, Y4 = 2 });
+            tetrisLayout[1].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
+            tetrisLayout[1].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 2, Y2 = 0, X3 = 1, Y3 = 1, X4 = 1, Y4 = 2 });
+            tetrisLayout[1].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 3, Y4 = 2 });
             changeNum[1] = 4;
             //T
-            tetrisOffset[5] = new List<SceneOffset>();
-            tetrisOffset[5].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 2, Y4 = 2 });
-            tetrisOffset[5].Add(new SceneOffset() { X1 = 2, Y1 = 0, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
-            tetrisOffset[5].Add(new SceneOffset() { X1 = 2, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
-            tetrisOffset[5].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 1 });
+            tetrisLayout[5] = new List<TerisLayout>();
+            tetrisLayout[5].Add(new TerisLayout() { X1 = 1, Y1 = 1, X2 = 2, Y2 = 1, X3 = 3, Y3 = 1, X4 = 2, Y4 = 2 });
+            tetrisLayout[5].Add(new TerisLayout() { X1 = 2, Y1 = 0, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
+            tetrisLayout[5].Add(new TerisLayout() { X1 = 2, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
+            tetrisLayout[5].Add(new TerisLayout() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 1 });
             changeNum[5] = 4;
 
             for (int i = 0; i < tetrisOffset.Length; i++)
@@ -247,11 +247,11 @@ namespace Tetris
             nextTetrisType = randGen.Next(7);//选择类型
             nextChangeType = randGen.Next(4);//选择变体
             nextChangeType = nextChangeType % changeNum[nextTetrisType];
-            nextOffset = tetrisOffset[nextTetrisType][nextChangeType];
+            nextLayout = tetrisLayout[nextTetrisType][nextChangeType];
         }
 
         //在某个坐标位置生成掉落方块
-        Grid[] GetRunGridsAtPos(int x, int y, SceneOffset offset)
+        Grid[] GenRunGridsAtPos(int x, int y, TerisLayout offset)
         {
             Grid[] grids = new Grid[4];
             grids[0] = GetGridByPos(x + offset.X1, y + offset.Y1);
@@ -261,10 +261,30 @@ namespace Tetris
             return grids;
         }
 
-        //预览区初始化
-        void CalcPreGrids()
+        void ShowRunGrids()
         {
-            SceneOffset offset = nextOffset;
+            foreach(var g in runGrids)
+            {
+                g.show=true;
+                g.running=true;
+            }
+        }
+        void RemoveRunGrids()
+        {
+
+            if (runGrids[0] == null) return;
+            for (int i = 0; i < runGrids.Length; i++)
+            {
+                runGrids[i].show = false;
+                runGrids[i].running = false;
+                runGrids[i] = null;
+            }
+        }
+
+        //预览区初始化
+        void GenPreGrids()
+        {
+            TerisLayout offset = nextLayout;
 
             foreach (Grid g in nextPreGrids)
             {
@@ -321,7 +341,8 @@ namespace Tetris
                     break;
                 case Keys.K:
                     IsAiControl = true;
-                    CalcAICtrl();
+                    //CalcAICtrl();
+                    RunPierreAI();
                     break;
                 case Keys.Escape:
                     IsAiControl = false;
@@ -379,17 +400,17 @@ namespace Tetris
             currentRunGridX = kRunGridBirthX;
             currentRunGridY = kRunGridBirthY;
 
-            if (nextOffset == null)
+            if (nextLayout == null)
             {
                 GenerateNextTetris();
             }
-            currentOffset = nextOffset;
+            currentLayout = nextLayout;
             curChangeType = nextChangeType;
             curTetrisType = nextTetrisType;
 
-            //把预览区的offset移到游戏区
-            runGrids = GetRunGridsAtPos(currentRunGridX, currentRunGridY, currentOffset);
-            if (!CheckNextGridValid(runGrids))
+            //把预览区的布局移到游戏区
+            runGrids = GenRunGridsAtPos(currentRunGridX, currentRunGridY, currentLayout);
+            if (!IsValidGrid(runGrids))
             {
                 gameState = GameState.GameOver;
                 return;
@@ -402,13 +423,80 @@ namespace Tetris
             //生成预览区的offset
             GenerateNextTetris();
             //计算预览区网格
-            CalcPreGrids();
+            GenPreGrids();
             gameState = GameState.NormalDrop;
 
             if (IsAiControl)
             {
-                CalcAICtrl();
+                //CalcAICtrl();
+                RunPierreAI();
             }
+            ShowRunGrids();
+
+        }
+        //新的ai
+        void RunPierreAI()
+        {
+            int maxEvalue = -999;
+            int best = 0;
+            int step = -1;
+            var bestlayout = currentLayout;
+
+            //每一列放下G，计算其评估值，选估值最大的位置
+            int changeType=0;
+            while (step < kSceneWidth - 1)
+            {
+                RemoveRunGrids();
+                var grids = GenRunGridsAtPos(step, 0, currentLayout);
+                if (!IsValidGrid(grids))
+                {
+                    step = -1;
+                    changeType++;//所有变换
+                    if (changeType == changeNum[curTetrisType])
+                    {
+                        break;
+                    }
+
+                    currentLayout = tetrisLayout[curTetrisType][changeType];
+                    curChangeType = changeType;
+                    continue;
+                }
+                runGrids = grids;
+                currentRunGridX = step;
+                currentRunGridY = 0;
+
+                while (RunGridMove(Direction.DOWN)) ;
+                //计算评估值
+                int h = GetLandingHeight();
+                int e = GetErodedMetric();
+                int t = GetTranslations();
+                int o = GetHoles();
+                int w = GetWells();
+                int evalue = e - h - t - 4 * o - w;
+                if (evalue > maxEvalue)
+                {
+                    maxEvalue = evalue;
+                    best = step;
+                    bestlayout = currentLayout;
+                }
+                step++;
+
+            }
+
+            RemoveRunGrids();
+            currentRunGridX = best;
+            currentRunGridY = 0;
+            currentLayout=bestlayout;
+            runGrids = GenRunGridsAtPos(best, 0, currentLayout);
+            
+
+            gameState = GameState.FastDrop;
+        }
+
+        int GetLandingHeight()
+        {
+            int landingH = kSceneHeight - runGrids[0].sceneY;
+            return landingH;
         }
 
         class CheckResult
@@ -642,28 +730,28 @@ namespace Tetris
             switch (dir)
             {
                 case Direction.DOWN:
-                    nextGrids = GetRunGridsAtPos(currentRunGridX, currentRunGridY + 1, currentOffset);
-                    if (!CheckNextGridValid(nextGrids)) return false;
+                    nextGrids = GenRunGridsAtPos(currentRunGridX, currentRunGridY + 1, currentLayout);
+                    if (!IsValidGrid(nextGrids)) return false;
                     currentRunGridY++;
                     break;
                 case Direction.LEFT:
-                    nextGrids = GetRunGridsAtPos(currentRunGridX - 1, currentRunGridY, currentOffset);
-                    if (!CheckNextGridValid(nextGrids)) return false;
+                    nextGrids = GenRunGridsAtPos(currentRunGridX - 1, currentRunGridY, currentLayout);
+                    if (!IsValidGrid(nextGrids)) return false;
                     currentRunGridX--;
                     break;
                 case Direction.RIGHT:
-                    nextGrids = GetRunGridsAtPos(currentRunGridX + 1, currentRunGridY, currentOffset);
-                    if (!CheckNextGridValid(nextGrids)) return false;
+                    nextGrids = GenRunGridsAtPos(currentRunGridX + 1, currentRunGridY, currentLayout);
+                    if (!IsValidGrid(nextGrids)) return false;
                     currentRunGridX++;
                     break;
                 case Direction.UP:
                     {
                         int changType = (curChangeType + 1) % changeNum[curTetrisType];
-                        SceneOffset offset = tetrisOffset[curTetrisType][changType];
-                        nextGrids = GetRunGridsAtPos(currentRunGridX, currentRunGridY, offset);
-                        if (!CheckNextGridValid(nextGrids))
+                        TerisLayout layout = tetrisLayout[curTetrisType][changType];
+                        nextGrids = GenRunGridsAtPos(currentRunGridX, currentRunGridY, layout);
+                        if (!IsValidGrid(nextGrids))
                             return false;
-                        currentOffset = offset;
+                        currentLayout = layout;
                         curChangeType = changType;
                     }
                     break;
