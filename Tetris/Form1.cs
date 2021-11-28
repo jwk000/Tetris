@@ -33,7 +33,7 @@ namespace Tetris
             I, J, L, O, S, T, Z
         }
         //网格大小
-        const int kGridSize = 11;
+        const int kGridSize = 32;
         //画布起点
         Point kScenePoint = new Point(10, 20);
         //画布网格数 10x20
@@ -62,6 +62,8 @@ namespace Tetris
         Grid[] nextPreGrids = new Grid[4];
         //7种组合，在第一块固定的时候，其他块的偏移
         List<SceneOffset>[] tetrisOffset = new List<SceneOffset>[7];
+        //局部坐标系，以左上角为原点
+        List<SceneOffset>[] localOffset = new List<SceneOffset>[7];
         //变体数量
         int[] changeNum = new int[7];
         //出生点
@@ -113,7 +115,6 @@ namespace Tetris
             InitForm();
             InitGrids();
             InitTetrisType();
-            InitAITable();
         }
 
         void InitForm()
@@ -182,11 +183,13 @@ namespace Tetris
             tetrisOffset[3] = new List<SceneOffset>();
             tetrisOffset[3].Add(new SceneOffset() { X1 = 1, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
             changeNum[3] = 1;
+
             //I
             tetrisOffset[0] = new List<SceneOffset>();
             tetrisOffset[0].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 1, Y4 = 3 });
             tetrisOffset[0].Add(new SceneOffset() { X1 = 0, Y1 = 1, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 3, Y4 = 1 });
             changeNum[0] = 2;
+
             //S
             tetrisOffset[4] = new List<SceneOffset>();
             tetrisOffset[4].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 2, Y3 = 1, X4 = 2, Y4 = 2 });
@@ -218,113 +221,16 @@ namespace Tetris
             tetrisOffset[5].Add(new SceneOffset() { X1 = 2, Y1 = 1, X2 = 1, Y2 = 2, X3 = 2, Y3 = 2, X4 = 3, Y4 = 2 });
             tetrisOffset[5].Add(new SceneOffset() { X1 = 1, Y1 = 0, X2 = 1, Y2 = 1, X3 = 1, Y3 = 2, X4 = 2, Y4 = 1 });
             changeNum[5] = 4;
-        }
 
-        class YRulerCell
-        {
-            public int Xoffset;//相对于起始点X的偏移
-            public int Yfill;//y<Y方向实心的格子个数，再往上全是空
-        }
-        //Y匹配规则
-        class YRuler
-        {
-            public int ChangeType;//适用变体类型
-            public int Xoffset;//当前的tetris原点和YRuler的原点的偏移
-            public List<YRulerCell> Rulers = new List<YRulerCell>();
-        }
-        List<YRuler>[] aiOffset = new List<YRuler>[7];
-
-        void InitAITable()
-        {
-            //O
-            aiOffset[3] = new List<YRuler>();
-            aiOffset[3].Add(new YRuler() { ChangeType = 0, Xoffset = -1 });
-            aiOffset[3][0].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[3][0].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 0 });
-
-            //I
-            aiOffset[0] = new List<YRuler>();
-            aiOffset[0].Add(new YRuler() { ChangeType = 0, Xoffset = -1 });
-            aiOffset[0][0].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[0][0].Rulers.Add(new YRulerCell() { Xoffset = -1, Yfill = 3 });//3表示>=3，这里特殊处理
-            aiOffset[0][0].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 3 });
-            aiOffset[0].Add(new YRuler() { ChangeType = 1, Xoffset = 0 });
-            aiOffset[0][1].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[0][1].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 0 });
-            aiOffset[0][1].Rulers.Add(new YRulerCell() { Xoffset = 2, Yfill = 0 });
-            aiOffset[0][1].Rulers.Add(new YRulerCell() { Xoffset = 3, Yfill = 0 });
-
-            //S
-            aiOffset[4] = new List<YRuler>();
-            aiOffset[4].Add(new YRuler() { ChangeType = 0, Xoffset = -2 });
-            aiOffset[4][0].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[4][0].Rulers.Add(new YRulerCell() { Xoffset = -1, Yfill = 1 });
-            aiOffset[4].Add(new YRuler() { ChangeType = 1, Xoffset = -1 });
-            aiOffset[4][1].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[4][1].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 0 });
-            aiOffset[4][1].Rulers.Add(new YRulerCell() { Xoffset = 2, Yfill = 1 });
-
-            //Z
-            aiOffset[6] = new List<YRuler>();
-            aiOffset[6].Add(new YRuler() { ChangeType = 0, Xoffset = -2 });
-            aiOffset[6][0].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[6][0].Rulers.Add(new YRulerCell() { Xoffset = -1, Yfill = 1 });
-            aiOffset[6][0].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 0 });
-            aiOffset[6].Add(new YRuler() { ChangeType = 1, Xoffset = -1 });
-            aiOffset[6][1].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[6][1].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 1 });
-
-            //L
-            aiOffset[2] = new List<YRuler>();
-            aiOffset[2].Add(new YRuler() { ChangeType = 0, Xoffset = -1 });
-            aiOffset[2][0].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[2][0].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 0 });
-            aiOffset[2].Add(new YRuler() { ChangeType = 1, Xoffset = -1 });
-            aiOffset[2][1].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[2][1].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 1 });
-            aiOffset[2][1].Rulers.Add(new YRulerCell() { Xoffset = 2, Yfill = 1 });
-            aiOffset[2].Add(new YRuler() { ChangeType = 2, Xoffset = -2 });
-            aiOffset[2][2].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[2][2].Rulers.Add(new YRulerCell() { Xoffset = -1, Yfill = 2 });
-            aiOffset[2].Add(new YRuler() { ChangeType = 3, Xoffset = -1 });
-            aiOffset[2][3].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[2][3].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 0 });
-            aiOffset[2][3].Rulers.Add(new YRulerCell() { Xoffset = 2, Yfill = 0 });
-
-            //J
-            aiOffset[1] = new List<YRuler>();
-            aiOffset[1].Add(new YRuler() { ChangeType = 0, Xoffset = -1 });
-            aiOffset[1][0].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[1][0].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 0 });
-            aiOffset[1].Add(new YRuler() { ChangeType = 1, Xoffset = -1 });
-            aiOffset[1][1].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[1][1].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 0 });
-            aiOffset[1][1].Rulers.Add(new YRulerCell() { Xoffset = 2, Yfill = 0 });
-            aiOffset[1].Add(new YRuler() { ChangeType = 2, Xoffset = -1 });
-            aiOffset[1][2].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[1][2].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 2 });
-            aiOffset[1].Add(new YRuler() { ChangeType = 3, Xoffset = -3 });
-            aiOffset[1][3].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[1][3].Rulers.Add(new YRulerCell() { Xoffset = -1, Yfill = 1 });
-            aiOffset[1][3].Rulers.Add(new YRulerCell() { Xoffset = -2, Yfill = 1 });
-
-            //T
-            aiOffset[5] = new List<YRuler>();
-            aiOffset[5].Add(new YRuler() { ChangeType = 0, Xoffset = -2 });
-            aiOffset[5][0].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[5][0].Rulers.Add(new YRulerCell() { Xoffset = -1, Yfill = 1 });
-            aiOffset[5][0].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 1 });
-            aiOffset[5].Add(new YRuler() { ChangeType = 1, Xoffset = -2 });
-            aiOffset[5][1].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[5][1].Rulers.Add(new YRulerCell() { Xoffset = -1, Yfill = 1 });
-            aiOffset[5].Add(new YRuler() { ChangeType = 2, Xoffset = -1 });
-            aiOffset[5][2].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[5][2].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 0 });
-            aiOffset[5][2].Rulers.Add(new YRulerCell() { Xoffset = 2, Yfill = 0 });
-            aiOffset[5].Add(new YRuler() { ChangeType = 3, Xoffset = -1 });
-            aiOffset[5][3].Rulers.Add(new YRulerCell() { Xoffset = 0, Yfill = 0 });
-            aiOffset[5][3].Rulers.Add(new YRulerCell() { Xoffset = 1, Yfill = 1 });
-
+            for (int i = 0; i < tetrisOffset.Length; i++)
+            {
+                localOffset[i] = new List<SceneOffset>();
+                for (int j = 0; j < tetrisOffset[i].Count; j++)
+                {
+                    SceneOffset offset = tetrisOffset[i][j];
+                    localOffset[i].Add(new SceneOffset() { X1 = 0, Y1 = 0, X2 = offset.X2 - offset.X1, Y2 = offset.Y2 - offset.Y1, X3 = offset.X3 - offset.X1, Y3 = offset.Y3 - offset.Y1, X4 = offset.X4 - offset.X1, Y4 = offset.Y4 - offset.Y1 });
+                }
+            }
         }
 
         Grid GetGridByPos(int x, int y)
@@ -381,6 +287,7 @@ namespace Tetris
         //从新开始
         void Restart()
         {
+            GameScore = 0;
             for (int i = 0; i < kSceneWidth; i++)
             {
                 for (int j = 0; j < kSceneHeight; j++)
@@ -487,6 +394,11 @@ namespace Tetris
                 gameState = GameState.GameOver;
                 return;
             }
+            foreach (Grid g in runGrids)
+            {
+                g.running = true;
+                g.show = true;
+            }
             //生成预览区的offset
             GenerateNextTetris();
             //计算预览区网格
@@ -499,180 +411,192 @@ namespace Tetris
             }
         }
 
+        class CheckResult
+        {
+            public int Change;//变形次数
+            public int X;//检查位置
+            public int MatchShape;//形状匹配
+            public int EraseLine;//消除行数
+            public int Height;//最终高度
+            public int ChangeType;
+        }
+
+        //计算一个结果最好的X坐标落下去
+        //1.选形状完全匹配的，如果有多个匹配进入2；
+        //2.选消除行数最多的，如果有多个匹配进入3；
+        //3.选高度最低的，如果有多个匹配选第一个；
         void CalcAICtrl()
         {
-            //对I特殊处理，优先变换成纵向
-            if (curTetrisType == (int)TetrisType.I)
+            //先把正在下落的格子显示状态抹除
+            foreach(var g in runGrids)
             {
-                if (curChangeType == 1)
-                {
-                    RunGridMove(Direction.UP);
-                }
+                g.show = false;
             }
-            //根据tetrisType+changeType寻找最合适的落点和变形
-            int startChangeType = curChangeType;
-            YRuler ruler = null;
-            do
+            List<CheckResult> results = new List<CheckResult>();
+            int changeType = curChangeType;
+            for (int change = 0; change < changeNum[curTetrisType]; change++)
             {
-                ruler = aiOffset[curTetrisType][curChangeType];
+                SceneOffset local_offset = localOffset[curTetrisType][changeType];
 
-                for (int j = kSceneHeight - 1; j >= 0; j--)
+                for (int x = 0; x < kSceneWidth; x++)
                 {
-                    bool bEmpty = true;//判断是否一行全空，全空停止检测
-                    for (int i = 0; i < kSceneWidth; i++)
+                    Grid[] lastValidGrids = null;
+                    for (int y = 0; y < kSceneHeight; y++)
                     {
-                        if (allGrids[i, j].show == false)
+                        var showGrids = GetRunGridsAtPos(x, y, local_offset);
+                        if (!CheckAIGridValid(showGrids))
                         {
-                            bool ok = checkRuler(i, j, ruler);
-                            if (ok)
+                            break;
+                        }
+                        lastValidGrids = showGrids;
+                    }
+                    if (lastValidGrids != null)
+                    {
+                        CheckResult result = new CheckResult();
+                        result.Change = change;
+                        result.ChangeType = changeType;
+                        result.X = x;
+                        int minY = kSceneHeight - 1;
+                        bool matchShape = true;
+                        Dictionary<int, bool> lineY = new Dictionary<int, bool>();
+
+                        foreach (var g in lastValidGrids)
+                        {
+                            //计算高度
+                            if (g.sceneY < minY)
                             {
-                                RunAISteps(i, ruler.Xoffset);
-                                return;
+                                minY = g.sceneY;
+                            }
+                            //匹配形状
+                            if (g.sceneY + 1 < kSceneHeight)
+                            {
+                                Grid nextGrid = allGrids[g.sceneX, g.sceneY + 1];
+                                if (!GridsContainsGrid(lastValidGrids,nextGrid) && !nextGrid.show)
+                                {
+                                    matchShape = false;
+                                }
+                            }
+                            //计算消除行数
+                            if (!lineY.ContainsKey(g.sceneY))
+                            {
+                                lineY.Add(g.sceneY, true);
+                                if (CheckLineYFinished(g.sceneY, lastValidGrids))
+                                {
+                                    result.EraseLine++;
+                                }
                             }
                         }
-                        else
-                        {
-                            bEmpty = false;
-                        }
-                    }
-                    if (bEmpty)
-                    {
-                        break;
+                        result.Height = kSceneHeight - minY;
+                        result.MatchShape = matchShape ? 1 : 2;
+
+                        results.Add(result);
                     }
                 }
-                //遍历所有适配情况
-                RunGridMove(Direction.UP);
-                if (curChangeType == startChangeType)
+
+                //遍历所有变形
+                changeType = (changeType + 1) % changeNum[curTetrisType];
+            }
+
+            results.Sort((a, b) =>
+            {
+                int minH = Math.Min(a.Height, b.Height);
+                if (minH > 12)
                 {
-                    //TODO 如果找不到就使用结果评估算法选择
-                    int x = calcBestY(ruler);
-                    RunAISteps(x, ruler.Xoffset);
+                    if (a.EraseLine == b.EraseLine)
+                    {
+                        if(a.Height == b.Height)
+                        {
+                            return a.MatchShape - b.MatchShape;
+                        }
+                        return a.Height - b.Height;
+                    }
+                    return b.EraseLine - a.EraseLine;
+                }
+                if (a.MatchShape == b.MatchShape)
+                {
+                    if (a.EraseLine == b.EraseLine)
+                    {
+                        return a.Height - b.Height;
+                    }
+                    return b.EraseLine - a.EraseLine;
+                }
+                else
+                {
+                    return a.MatchShape - b.MatchShape;
+                }
+
+            });
+
+            var finalResult = results[0];
+            var offset = tetrisOffset[curTetrisType][finalResult.ChangeType];
+            int moveX = finalResult.X - offset.X1 - currentRunGridX;
+            foreach(var g in runGrids)//还原显示状态
+            {
+                g.show = true;
+            }
+            RunAISteps(moveX, finalResult.Change);
+        }
+        bool GridsContainsGrid(Grid[] grids,Grid grid)
+        {
+            foreach(var g in grids)
+            {
+                if (g.sceneX == grid.sceneX && g.sceneY == grid.sceneY)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool CheckLineYFinished(int y, Grid[] grids)
+        {
+            foreach (var h in grids)
+            {
+                h.show = true;
+            }
+            bool finished = true;
+            for (int lineX = 0; lineX < kSceneWidth; lineX++)
+            {
+                if (!allGrids[lineX, y].show)
+                {
+                    finished = false;
                     break;
                 }
-            } while (true);
+            }
+            foreach (var h in grids)
+            {
+                h.show = false;
+            }
+            return finished;
         }
 
-        int calcBestY(YRuler ruler)
+
+        void RunAISteps(int moveX, int change)
         {
-            int[] h = new int[kSceneWidth];
-            
-            int c = 0;
-            for (int i = 0; i < kSceneWidth; i++)
+            while (change > 0)
             {
-                int ih = 0;
-                for (int j = 0; j < kSceneHeight; j++)
-                {
-                    if (allGrids[i, j].show == false)
-                    {
-                        ih++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                h[i] = kSceneHeight - ih;
+                RunGridMove(Direction.UP);
+                change--;
             }
 
-            int min = kSceneHeight;
-            //根据ruler计算结果最低点
-            for(int i=0;i<kSceneWidth;i++)
+            if (moveX > 0)
             {
-                int max = 0;
-                foreach(var r in ruler.Rulers)
-                {
-                    int x = i + r.Xoffset;
-                    if (x < 0 || x > kSceneWidth - 1) { max = kSceneHeight; break; }
-                    if (max < h[x]) max = h[x];
-                }
-                if (min > max) { min = max; c = i; }
-            }
-            return c;
-        }
-
-        List<Action> aiRunSteps = new List<Action>();
-        void RunAISteps(int x, int xoffset)
-        {
-            int off = x - currentRunGridX + xoffset;
-            if (off > 0)
-            {
-                while (off > 0)
+                while (moveX > 0)
                 {
                     RunGridMove(Direction.RIGHT);
-                    off--;
+                    moveX--;
                 }
             }
-            else if (off < 0)
+            else if (moveX < 0)
             {
-                while (off < 0)
+                while (moveX < 0)
                 {
                     RunGridMove(Direction.LEFT);
-                    off++;
+                    moveX++;
                 }
             }
             gameState = GameState.FastDrop;
         }
 
-        bool checkRuler(int x, int y, YRuler ruler)
-        {
-            foreach (var r in ruler.Rulers)
-            {
-                if (r.Yfill == 3)//I 特殊处理
-                {
-                    if (checkRulerCell(x, y, r))
-                        return true;
-                    else
-                        continue;
-                }
-                if (!checkRulerCell(x, y, r))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        bool checkRulerCell(int x, int y, YRulerCell r)
-        {
-            int xx = x + r.Xoffset;
-            if (xx < -1 || xx > kSceneWidth)
-            {
-                return false;
-            }
-            else if (xx == -1 || xx == kSceneWidth)
-            {
-                if (r.Yfill < 3) return false;
-            }
-            else
-            {
-                //底部不能为空
-                if (y < kSceneHeight - 1 && allGrids[xx, y + 1].show == false)
-                {
-                    return false;
-                }
-
-                for (int i = 0; i < r.Yfill; i++)
-                {
-                    if (allGrids[xx, y - i].show == false)
-                    {
-                        return false;
-                    }
-                }
-                //Yfill=3特殊处理
-                if (r.Yfill < 3)
-                {
-                    for (int i = 0; i <= y - r.Yfill; i++)
-                    {
-                        if (allGrids[xx, i].show)
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-
-        }
 
         //正在下落
         void OnDropping()
@@ -695,12 +619,20 @@ namespace Tetris
             LEFT, RIGHT, DOWN, UP
         }
 
+        bool CheckAIGridValid(Grid[] grids)
+        {
+            foreach(var g in grids)
+            {
+                if (g == null || g.show) return false;
+            }
+            return true;
+        }
         bool CheckNextGridValid(Grid[] nextGrids)
         {
-            for (int i = 0; i < nextGrids.Length; i++)
+            foreach (Grid g in nextGrids)
             {
-                if (nextGrids[i] == null) return false;
-                if (!nextGrids[i].running && nextGrids[i].show) return false;
+                if (g == null) return false;
+                if (!g.running && g.show) return false;
             }
             return true;
         }
