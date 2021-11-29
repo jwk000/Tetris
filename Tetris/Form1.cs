@@ -411,6 +411,12 @@ namespace Tetris
             }
         }
 
+        void CalcAICtrl()
+        {
+           // CalcAI1();
+            CalcAI2();
+        }
+
         class CheckResult
         {
             public int Change;//变形次数
@@ -425,10 +431,10 @@ namespace Tetris
         //1.选形状完全匹配的，如果有多个匹配进入2；
         //2.选消除行数最多的，如果有多个匹配进入3；
         //3.选高度最低的，如果有多个匹配选第一个；
-        void CalcAICtrl()
+        void CalcAI1()
         {
             //先把正在下落的格子显示状态抹除
-            foreach(var g in runGrids)
+            foreach (var g in runGrids)
             {
                 g.show = false;
             }
@@ -471,7 +477,7 @@ namespace Tetris
                             if (g.sceneY + 1 < kSceneHeight)
                             {
                                 Grid nextGrid = allGrids[g.sceneX, g.sceneY + 1];
-                                if (!GridsContainsGrid(lastValidGrids,nextGrid) && !nextGrid.show)
+                                if (!GridsContainsGrid(lastValidGrids, nextGrid) && !nextGrid.show)
                                 {
                                     matchShape = false;
                                 }
@@ -500,11 +506,11 @@ namespace Tetris
             results.Sort((a, b) =>
             {
                 int minH = Math.Min(a.Height, b.Height);
-                if (minH > 12)
+                if (minH > 10)
                 {
                     if (a.EraseLine == b.EraseLine)
                     {
-                        if(a.Height == b.Height)
+                        if (a.Height == b.Height)
                         {
                             return a.MatchShape - b.MatchShape;
                         }
@@ -530,15 +536,15 @@ namespace Tetris
             var finalResult = results[0];
             var offset = tetrisOffset[curTetrisType][finalResult.ChangeType];
             int moveX = finalResult.X - offset.X1 - currentRunGridX;
-            foreach(var g in runGrids)//还原显示状态
+            foreach (var g in runGrids)//还原显示状态
             {
                 g.show = true;
             }
             RunAISteps(moveX, finalResult.Change);
         }
-        bool GridsContainsGrid(Grid[] grids,Grid grid)
+        bool GridsContainsGrid(Grid[] grids, Grid grid)
         {
-            foreach(var g in grids)
+            foreach (var g in grids)
             {
                 if (g.sceneX == grid.sceneX && g.sceneY == grid.sceneY)
                 {
@@ -569,6 +575,323 @@ namespace Tetris
             return finished;
         }
 
+        //Pierre Dellacherie算法
+        void CalcAI2()
+        {
+            //先把正在下落的格子显示状态抹除
+            foreach (var g in runGrids)
+            {
+                g.show = false;
+            }
+
+            int R_X = 0; //最优坐标
+            int R_Change = 0;//最优变换次数
+            int R_ChangeType = 0;
+            int R_Value = -9999;//最优评估值
+            int changeType = curChangeType;
+            for (int change = 0; change < changeNum[curTetrisType]; change++)
+            {
+                SceneOffset local_offset = localOffset[curTetrisType][changeType];
+                for (int x = 0; x < kSceneWidth; x++)
+                {
+                    Grid[] lastValidGrids = null;
+                    for (int y = 0; y < kSceneHeight; y++)
+                    {
+                        var showGrids = GetRunGridsAtPos(x, y, local_offset);
+                        if (!CheckAIGridValid(showGrids))
+                        {
+                            break;
+                        }
+                        lastValidGrids = showGrids;
+                    }
+                    if (lastValidGrids != null)
+                    {
+                        int landingHeight = aiCalcLandingHeight(lastValidGrids);
+                        int eraseLine = aiCalcEraseLine(lastValidGrids);
+                        var finalGrids = aiCalcFinalGrids(lastValidGrids);
+                        int boardRowTransitions = aiCalcRow(finalGrids);
+                        int boardColTransitions = aiCalcColumn(finalGrids);
+                        int boardBuriedHoles = aiCalcHoles(finalGrids);
+                        int wells = aiCalcWell(finalGrids);
+                        int value = -45 * landingHeight + 34 * eraseLine - 32 * boardRowTransitions - 93 * boardColTransitions - (79 * boardBuriedHoles) - 34 * wells;
+                        if (value > R_Value)
+                        {
+                            R_Value = value;
+                            R_X = x;
+                            R_Change = change;
+                            R_ChangeType = changeType;
+                        }
+                    }
+                }
+
+                //遍历所有变形
+                changeType = (changeType + 1) % changeNum[curTetrisType];
+            }
+
+
+            var offset = tetrisOffset[curTetrisType][R_ChangeType];
+            int moveX = R_X - offset.X1 - currentRunGridX;
+            foreach (var g in runGrids)//还原显示状态
+            {
+                g.show = true;
+            }
+            RunAISteps(moveX, R_Change);
+
+        }
+
+        //参数1.高度
+        int aiCalcLandingHeight(Grid[] grids)
+        {
+            int minY = kSceneHeight;
+            int maxY = 0;
+            foreach (var g in grids)
+            {
+                //计算高度
+                if (g.sceneY < minY)
+                {
+                    minY = g.sceneY;
+                }
+                if (g.sceneY > maxY)
+                {
+                    maxY = g.sceneY;
+                }
+            }
+            int h = kSceneHeight - 1 - (minY + maxY) / 2;
+            return h;
+        }
+
+        //参数2.消除行数*贡献方块
+        int aiCalcEraseLine(Grid[] grids)
+        {
+            int line = 0;
+            int cell = 0;
+            Dictionary<int, bool> lineY = new Dictionary<int, bool>();
+
+            foreach (var g in grids)
+            {
+                //计算消除行数
+                if (!lineY.ContainsKey(g.sceneY))
+                {
+                    if (CheckLineYFinished(g.sceneY, grids))
+                    {
+                        lineY.Add(g.sceneY, true);
+                        line++;
+                        cell++;
+                    }
+                    else
+                    {
+                        lineY.Add(g.sceneY, false);
+                    }
+                }
+                else if (lineY[g.sceneY])
+                {
+                    cell++;
+                }
+            }
+            return line * cell;
+        }
+
+        //参数3.行变换
+        int aiCalcRow(Grid[,] finalGrids)
+        {
+            int total = 0;
+            for (int y = 0; y < kSceneHeight; y++)
+            {
+                int row = 0;
+                bool show = true;
+                for (int x = 0; x < kSceneWidth; x++)
+                {
+                    var g = finalGrids[x, y];
+                    if (g.show != show)
+                    {
+                        row++;
+                        show = g.show;
+                    }
+                }
+                total += row;
+            }
+            return total;
+        }
+
+        //参数4.列变换
+        int aiCalcColumn(Grid[,] finalGrids)
+        {
+            int total = 0;
+            for (int x = 0; x < kSceneWidth; x++)
+            {
+                int row = 0;
+                bool show = true;
+                for (int y = 0; y < kSceneHeight; y++)
+                {
+                    var g = finalGrids[x, y];
+                    if (g.show != show)
+                    {
+                        row++;
+                        show = g.show;
+                    }
+                }
+                total += row;
+            }
+            return total;
+        }
+
+        //参数5.空洞数量
+        int aiCalcHoles(Grid[,] finalGrids)
+        {
+            int total = 0;
+            for (int x = 0; x < kSceneWidth; x++)
+            {
+                int col = 0;
+                int state = 0;//0初始 1遇到方块 2遇到空格
+                for (int y = 0; y < kSceneHeight; y++)
+                {
+                    var g = finalGrids[x, y];
+                    if (state == 0)
+                    {
+                        if (g.show) state = 1;
+                    }
+                    else if (state == 1)
+                    {
+                        if (!g.show) { state = 2; col++; }
+                    }
+                    else if (state == 2)
+                    {
+                        if (g.show) state = 1;
+                    }
+                }
+                total += col;
+            }
+            return total;
+        }
+
+        //参数6.井
+        int aiCalcWell(Grid[,] finalGrids)
+        {
+            int total = 0;
+            for (int x = 0; x < kSceneWidth; x++)
+            {
+                int state = 1;//1遇到方块 2遇到空格
+                int lastY = -1;
+
+                List<int> wells = new List<int>();
+                var f = new Action<int>((int y) =>
+                {
+                    int lr = 0;
+                    if (x == 0) { lr++; }
+                    else
+                    {
+                        var lg = finalGrids[x - 1, y];
+                        if (lg.show) { lr++; }
+                    }
+                    if (x == kSceneWidth - 1) { lr++; }
+                    else
+                    {
+                        var rg = finalGrids[x + 1, y];
+                        if (rg.show) { lr++; }
+                    }
+                    if (lr == 2)
+                    {
+                        if (lastY == y - 1)
+                        {
+                            wells[wells.Count - 1]++;
+                        }
+                        else
+                        {
+                            wells.Add(1);
+                        }
+                        lastY = y;
+                    }
+
+                });
+                for (int y = 0; y < kSceneHeight; y++)
+                {
+                    var g = finalGrids[x, y];
+                    if (state == 1)
+                    {
+                        if (!g.show)
+                        {
+                            state = 2;
+                            f(y);
+                        }
+                    }
+                    else if (state == 2)
+                    {
+                        if (g.show) { state = 1; }
+                        else
+                        {
+                            f(y);
+                        }
+                    }
+                }
+                foreach (int w in wells)
+                {
+                    int n = w;
+                    while (n > 0)
+                    {
+                        total += n;
+                        n--;
+                    }
+                }
+            }
+            return total;
+        }
+
+        Grid[,] aiCalcFinalGrids(Grid[] grids)
+        {
+            Grid[,] finalGrids = new Grid[kSceneWidth, kSceneHeight];
+            foreach (var g in grids)
+            {
+                g.show = true;
+            }
+            for (int i = 0; i < kSceneHeight; i++)
+            {
+                for (int j = 0; j < kSceneWidth; j++)
+                {
+                    var g = allGrids[j, i];
+                    Grid grid = new Grid();
+                    grid.show = g.show;
+                    grid.sceneX = j;
+                    grid.sceneY = i;
+                    finalGrids[j, i] = grid;
+                }
+            }
+            foreach (var g in grids) { g.show = false; }
+            //下落
+            while (true)
+            {
+                int Y = -1;
+                for (int y = kSceneHeight - 1; y >= 0; y--)
+                {
+                    bool finish = true;
+                    for (int x = 0; x < kSceneWidth; x++)
+                    {
+                        if (!finalGrids[x, y].show)
+                        {
+                            finish = false;
+                            break;
+                        }
+                    }
+                    if (finish)
+                    {
+                        Y = y;
+                        break;
+                    }
+                }
+                if (Y == -1)
+                {
+                    break;
+                }
+                for (int y = Y; y > 0; y--)
+                {
+                    for (int x = 0; x < kSceneWidth; x++)
+                    {
+                        finalGrids[x, y].show = finalGrids[x, y - 1].show;
+                    }
+                }
+            }
+
+            return finalGrids;
+        }
 
         void RunAISteps(int moveX, int change)
         {
@@ -621,7 +944,7 @@ namespace Tetris
 
         bool CheckAIGridValid(Grid[] grids)
         {
-            foreach(var g in grids)
+            foreach (var g in grids)
             {
                 if (g == null || g.show) return false;
             }
